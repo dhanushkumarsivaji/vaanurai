@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaanurai — Understand any document in your language</title>
+  <meta name="description" content="Vaanurai helps people understand confusing letters, notices, bills, and messages in their own language through WhatsApp." />
+  <style>
+    :root {
+      --bg: #080b1f;
+      --bg-soft: #101638;
+      --card: rgba(255, 255, 255, 0.08);
+      --card-strong: rgba(255, 255, 255, 0.14);
+      --text: #f8fbff;
+      --muted: #bcc7dc;
+      --muted-2: #8592ad;
+      --brand: #67e8f9;
+      --brand-2: #a78bfa;
+      --accent: #ffd166;
+      --success: #4ade80;
+      --danger: #fb7185;
+      --whatsapp: #25D366;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 5%, rgba(103, 232, 249, 0.22), transparent 26rem),
+        radial-gradient(circle at 88% 8%, rgba(167, 139, 250, 0.22), transparent 24rem),
+        radial-gradient(circle at 50% 55%, rgba(255, 209, 102, 0.08), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .site {
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(8, 11, 31, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-inner {
+      width: min(var(--max), calc(100% - 34px));
+      margin: 0 auto;
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 850;
+      letter-spacing: -0.04em;
+      font-size: 1.35rem;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(103, 232, 249, 0.95), rgba(167, 139, 250, 0.95)),
+        #fff;
+      box-shadow: 0 10px 32px rgba(103, 232, 249, 0.25);
+    }
+
+    .logo svg { width: 25px; height: 25px; }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font-weight: 780;
+      letter-spacing: -0.02em;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #06101c;
+      box-shadow: 0 16px 34px rgba(103, 232, 249, 0.22);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-whatsapp {
+      background: var(--whatsapp);
+      color: #04110a;
+      box-shadow: 0 16px 34px rgba(37, 211, 102, 0.22);
+    }
+
+    .hero {
+      width: min(var(--max), calc(100% - 34px));
+      margin: 0 auto;
+      min-height: calc(100vh - 74px);
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: center;
+      gap: 54px;
+      padding: 74px 0 56px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #d9faff;
+      background: rgba(103, 232, 249, 0.12);
+      border: 1px solid rgba(103, 232, 249, 0.25);
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-weight: 720;
+      font-size: 0.88rem;
+      margin-bottom: 22px;
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--success);
+      border-radius: 999px;
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.65);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.65); }
+      70% { box-shadow: 0 0 0 13px rgba(74, 222, 128, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6.7rem);
+      line-height: 0.93;
+      letter-spacing: -0.08em;
+      margin: 0 0 24px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fff, #c7f9ff 34%, #d8c5ff 68%, #fff0bc);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      max-width: 680px;
+      color: var(--muted);
+      font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+      line-height: 1.7;
+      margin: 0 0 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 13px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .hero-visual {
+      position: relative;
+      min-height: 640px;
+      display: grid;
+      place-items: center;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(1px);
+      opacity: 0.75;
+      animation: float 7s ease-in-out infinite;
+    }
+
+    .orb.one {
+      width: 130px;
+      height: 130px;
+      top: 40px;
+      left: 26px;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(103, 232, 249, 0.9), transparent 70%);
+    }
+
+    .orb.two {
+      width: 90px;
+      height: 90px;
+      right: 16px;
+      top: 170px;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 209, 102, 0.9), transparent 70%);
+      animation-delay: -1.2s;
+    }
+
+    .orb.three {
+      width: 160px;
+      height: 160px;
+      right: 50px;
+      bottom: 86px;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(167, 139, 250, 0.9), transparent 70%);
+      animation-delay: -2.2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -18px, 0); }
+    }
+
+    .phone {
+      width: min(390px, 92vw);
+      height: 625px;
+      border-radius: 42px;
+      padding: 14px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.08));
+      box-shadow: var(--shadow);
+      position: relative;
+      transform: rotate(2deg);
+      animation: phoneFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes phoneFloat {
+      0%, 100% { transform: rotate(2deg) translateY(0); }
+      50% { transform: rotate(-1deg) translateY(-12px); }
+    }
+
+    .phone-screen {
+      height: 100%;
+      border-radius: 32px;
+      overflow: hidden;
+      background: #0b1222;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      position: relative;
+    }
+
+    .wa-header {
+      height: 78px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #075e54, #128c7e);
+    }
+
+    .wa-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      display: grid;
+      place-items: center;
+      color: #08101f;
+      font-weight: 900;
+    }
+
+    .wa-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .wa-title strong {
+      font-size: 1rem;
+    }
+
+    .wa-title span {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.82rem;
+    }
+
+    .chat {
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background:
+        linear-gradient(rgba(11, 18, 34, 0.84), rgba(11, 18, 34, 0.84)),
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M0 0h8v8H0zM32 32h8v8h-8zM64 0h8v8h-8zM0 64h8v8H0zM64 64h8v8h-8z'/%3E%3C/g%3E%3C/svg%3E");
+      height: calc(100% - 78px);
+    }
+
+    .bubble {
+      max-width: 85%;
+      border-radius: 18px;
+      padding: 11px 13px;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      animation: bubbleIn 0.7s ease both;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: #dcf8c6;
+      color: #102016;
+      border-bottom-right-radius: 5px;
+    }
+
+    .bubble.bot {
+      align-self: flex-start;
+      background: #ffffff;
+      color: #172033;
+      border-bottom-left-radius: 5px;
+    }
+
+    .doc-card {
+      background: #fff;
+      color: #1d2639;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .doc-line {
+      height: 8px;
+      border-radius: 99px;
+      background: #d6dbe7;
+      margin: 8px 0;
+    }
+
+    .doc-line.short { width: 54%; }
+    .doc-line.mid { width: 76%; }
+    .doc-line.long { width: 94%; }
+
+    .voice-note {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .play {
+      width: 29px;
+      height: 29px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--whatsapp);
+      color: white;
+      font-size: 0.72rem;
+    }
+
+    .wave {
+      flex: 1;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .wave span {
+      width: 4px;
+      border-radius: 999px;
+      background: #7b879c;
+      animation: wave 900ms ease-in-out infinite;
+      height: 8px;
+    }
+
+    .wave span:nth-child(2) { height: 16px; animation-delay: -100ms; }
+    .wave span:nth-child(3) { height: 22px; animation-delay: -200ms; }
+    .wave span:nth-child(4) { height: 12px; animation-delay: -300ms; }
+    .wave span:nth-child(5) { height: 19px; animation-delay: -400ms; }
+    .wave span:nth-child(6) { height: 10px; animation-delay: -500ms; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.72); opacity: .55; }
+      50% { transform: scaleY(1.15); opacity: 1; }
+    }
+
+    section {
+      width: min(var(--max), calc(100% - 34px));
+      margin: 0 auto;
+      padding: 84px 0;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    .kicker {
+      color: var(--brand);
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.06em;
+    }
+
+    .section-text {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.07rem;
+      margin-top: 16px;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .glass {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.055));
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .problem-card {
+      padding: 28px;
+      min-height: 310px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .problem-card h3 {
+      margin: 0 0 16px;
+      font-size: 1.4rem;
+      letter-spacing: -0.04em;
+    }
+
+    .pain-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .pain-item {
+      display: flex;
+      gap: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .icon-round {
+      flex: 0 0 auto;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(251, 113, 133, 0.16);
+      color: #fecdd3;
+      font-size: 0.8rem;
+    }
+
+    .solution-icon {
+      background: rgba(74, 222, 128, 0.14);
+      color: #bbf7d0;
+    }
+
+    .paper-illustration {
+      position: absolute;
+      right: -20px;
+      bottom: -22px;
+      width: 230px;
+      opacity: 0.15;
+      transform: rotate(-8deg);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .step {
+      padding: 22px;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-number {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(103, 232, 249, 0.14);
+      border: 1px solid rgba(103, 232, 249, 0.18);
+      color: #c8fbff;
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .step h3 {
+      margin: 0 0 10px;
+      letter-spacing: -0.035em;
+      font-size: 1.18rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature {
+      padding: 24px;
+      min-height: 240px;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-6px);
+      background: var(--card-strong);
+      border-color: rgba(103, 232, 249, 0.22);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(103, 232, 249, 0.20), rgba(167, 139, 250, 0.18));
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      margin-bottom: 18px;
+      font-size: 1.35rem;
+    }
+
+    .feature h3 {
+      margin: 0 0 10px;
+      letter-spacing: -0.035em;
+    }
+
+    .feature p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .demo-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .upload-card,
+    .answer-card {
+      padding: 28px;
+      min-height: 390px;
+    }
+
+    .mini-document {
+      background: rgba(255, 255, 255, 0.95);
+      color: #142033;
+      border-radius: 20px;
+      padding: 22px;
+      transform: rotate(-1.2deg);
+      box-shadow: 0 22px 55px rgba(0,0,0,0.28);
+      margin-top: 24px;
+    }
+
+    .mini-document .stamp {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: #7f1d1d;
+      background: #fee2e2;
+      font-weight: 850;
+      font-size: 0.74rem;
+      margin-bottom: 12px;
+    }
+
+    .answer-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .answer-row {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .answer-row strong {
+      color: var(--text);
+    }
+
+    .dot-check {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(74, 222, 128, 0.14);
+      color: #bbf7d0;
+      flex: 0 0 auto;
+      font-size: 0.8rem;
+    }
+
+    .pricing {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .price-card {
+      padding: 30px;
+    }
+
+    .price-badge {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 209, 102, 0.14);
+      color: #fff4c7;
+      border: 1px solid rgba(255, 209, 102, 0.22);
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .price {
+      font-size: clamp(3rem, 6vw, 5.6rem);
+      line-height: 0.9;
+      letter-spacing: -0.08em;
+      margin: 0 0 16px;
+    }
+
+    .price span {
+      font-size: 1.2rem;
+      color: var(--muted);
+      letter-spacing: -0.02em;
+    }
+
+    .launch-list {
+      display: grid;
+      gap: 13px;
+      margin-top: 22px;
+    }
+
+    .launch-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 18px;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .week {
+      color: var(--brand);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .trust {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .trust-box {
+      padding: 30px;
+    }
+
+    .trust-box h3 {
+      margin: 0 0 12px;
+      font-size: 1.65rem;
+      letter-spacing: -0.05em;
+    }
+
+    .trust-box p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .warning {
+      border-color: rgba(255, 209, 102, 0.25);
+      background: linear-gradient(180deg, rgba(255, 209, 102, 0.10), rgba(255, 255, 255, 0.055));
+    }
+
+    .cta {
+      padding: 0 0 96px;
+    }
+
+    .cta-panel {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(34px, 7vw, 72px);
+      border-radius: 38px;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(103, 232, 249, 0.24), transparent 24rem),
+        radial-gradient(circle at 90% 0%, rgba(255, 209, 102, 0.18), transparent 22rem),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.06));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .cta-panel h2 {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .cta-panel p {
+      max-width: 660px;
+      margin: 18px auto 28px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.08rem;
+    }
+
+    .cta-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 28px 0;
+      color: var(--muted-2);
+    }
+
+    .footer-inner {
+      width: min(var(--max), calc(100% - 34px));
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 0.94rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .problem-grid,
+      .demo-panel,
+      .pricing,
+      .trust {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 54px;
+      }
+
+      .hero-visual {
+        min-height: 610px;
+      }
+
+      .steps,
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav-inner {
+        height: 66px;
+      }
+
+      .brand {
+        font-size: 1.1rem;
+      }
+
+      .logo {
+        width: 38px;
+        height: 38px;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 44px 0 34px;
+        gap: 24px;
+      }
+
+      .hero-visual {
+        min-height: 560px;
+      }
+
+      .phone {
+        height: 570px;
+      }
+
+      .steps,
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 62px 0;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .hero-actions,
+      .cta-actions {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <main class="site">
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="#top" class="brand" aria-label="Vaanurai home">
+          <span class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M5 5.5C5 4.12 6.12 3 7.5 3h9C17.88 3 19 4.12 19 5.5v13.2c0 .92-1.02 1.48-1.8.99l-2.5-1.56a2 2 0 0 0-1.06-.3H7.5A2.5 2.5 0 0 1 5 15.33V5.5Z" fill="#071120"/>
+              <path d="M8.5 8h7M8.5 11h5.6M8.5 14h3.8" stroke="#67e8f9" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+          Vaanurai
+        </a>
+
+        <div class="nav-links">
+          <a href="#problem">Problem</a>
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#launch">Launch plan</a>
+        </div>
+
+        <a class="btn btn-primary" href="#join">Join waitlist</a>
+      </div>
+    </nav>
+
+    <header id="top" class="hero">
+      <div class="hero-copy reveal">
+        <div class="eyebrow"><span class="pulse-dot"></span> WhatsApp-first language explainer</div>
+        <h1><span class="gradient-text">Understand any document</span> in your language.</h1>
+        <p class="lead">
+          Vaanurai helps everyday people understand confusing letters, notices, bills, and official messages.
+          Send a photo on WhatsApp and get a simple explanation, key risks, and next steps in Tamil, Hindi, and more.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-whatsapp" href="#join">
+            <span>●</span> Try the demo
+          </a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+
+        <div class="trust-row">
+          <span class="trust-pill">⚡ Explain in seconds</span>
+          <span class="trust-pill">🗣️ Text + voice ready</span>
+          <span class="trust-pill">🔒 Privacy-first design</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" aria-label="WhatsApp demo illustration">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="orb three"></div>
+
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="wa-header">
+              <div class="wa-avatar">V</div>
+              <div class="wa-title">
+                <strong>Vaanurai</strong>
+                <span>online · explains documents</span>
+              </div>
+            </div>
+            <div class="chat">
+              <div class="bubble user" style="--delay: 100ms;">
+                I received this bank notice. What does it mean?
+                <div class="doc-card" style="margin-top:10px;">
+                  <strong>NOTICE</strong>
+                  <div class="doc-line long"></div>
+                  <div class="doc-line mid"></div>
+                  <div class="doc-line short"></div>
+                </div>
+              </div>
+
+              <div class="bubble bot" style="--delay: 500ms;">
+                <strong>Simple meaning:</strong><br />
+                This letter is asking you to update one document before the deadline.
+              </div>
+
+              <div class="bubble bot" style="--delay: 850ms;">
+                <strong>Important:</strong><br />
+                Do not ignore it. Visit the branch or upload the document online.
+              </div>
+
+              <div class="bubble bot" style="--delay: 1200ms;">
+                <div class="voice-note">
+                  <span class="play">▶</span>
+                  <div class="wave">
+                    <span></span><span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                  <small>0:24</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section id="problem">
+      <div class="section-head reveal">
+        <div class="kicker">The problem</div>
+        <h2>Official messages create fear when people cannot understand them.</h2>
+        <p class="section-text">
+          A bank letter, insurance notice, government form, school circular, or legal-looking message can create anxiety.
+          People are not only asking, “What language is this?” They are asking, “What should I do now?”
+        </p>
+      </div>
+
+      <div class="problem-grid">
+        <div class="problem-card glass reveal">
+          <h3>Today, people struggle silently.</h3>
+          <div class="pain-list">
+            <div class="pain-item"><span class="icon-round">!</span><span>They depend on relatives or local agents to read English or complex official language.</span></div>
+            <div class="pain-item"><span class="icon-round">!</span><span>They may pay small amounts repeatedly just to understand ordinary letters.</span></div>
+            <div class="pain-item"><span class="icon-round">!</span><span>For serious documents, they may delay action and miss deadlines.</span></div>
+            <div class="pain-item"><span class="icon-round">!</span><span>Sometimes they ignore the message because it feels too confusing.</span></div>
+          </div>
+          <svg class="paper-illustration" viewBox="0 0 240 260" fill="none" aria-hidden="true">
+            <path d="M40 14h110l50 50v174a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V22a8 8 0 0 1 8-8Z" fill="#fff"/>
+            <path d="M150 14v50h50" fill="#dbeafe"/>
+            <path d="M60 92h120M60 124h100M60 156h120M60 188h70" stroke="#0f172a" stroke-width="10" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="problem-card glass reveal">
+          <h3>Vaanurai turns confusion into clarity.</h3>
+          <div class="pain-list">
+            <div class="pain-item"><span class="icon-round solution-icon">✓</span><span>Send a photo or message on WhatsApp.</span></div>
+            <div class="pain-item"><span class="icon-round solution-icon">✓</span><span>Get a plain-language summary in your language.</span></div>
+            <div class="pain-item"><span class="icon-round solution-icon">✓</span><span>See deadlines, risk level, and the next action to take.</span></div>
+            <div class="pain-item"><span class="icon-round solution-icon">✓</span><span>Listen as a voice note when reading is difficult.</span></div>
+          </div>
+          <svg class="paper-illustration" viewBox="0 0 260 260" fill="none" aria-hidden="true">
+            <circle cx="130" cy="130" r="108" fill="#67e8f9"/>
+            <path d="M83 126.5 112 155l65-72" stroke="#071120" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="section-head reveal">
+        <div class="kicker">How it works</div>
+        <h2>As simple as sending a WhatsApp message.</h2>
+        <p class="section-text">
+          The first version can be beautifully simple: photo in, text extracted, explanation generated, answer sent back.
+          Voice and payments can be added after the core experience is trusted.
+        </p>
+      </div>
+
+      <div class="steps">
+        <div class="step glass reveal">
+          <div class="step-number">1</div>
+          <h3>Send a photo</h3>
+          <p>User sends a document, notice, bill, or message screenshot on WhatsApp.</p>
+        </div>
+        <div class="step glass reveal">
+          <div class="step-number">2</div>
+          <h3>Read the text</h3>
+          <p>Vaanurai extracts the content from English, Tamil, Hindi, or mixed-language documents.</p>
+        </div>
+        <div class="step glass reveal">
+          <div class="step-number">3</div>
+          <h3>Explain simply</h3>
+          <p>It summarizes what it means, why it matters, and what happens if ignored.</p>
+        </div>
+        <div class="step glass reveal">
+          <div class="step-number">4</div>
+          <h3>Reply clearly</h3>
+          <p>The user receives a clean response, next steps, and later a voice note.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="section-head reveal">
+        <div class="kicker">Why it feels useful</div>
+        <h2>Not just translation. Practical understanding.</h2>
+      </div>
+
+      <div class="features">
+        <div class="feature glass reveal">
+          <div class="feature-icon">📄</div>
+          <h3>Document explanation</h3>
+          <p>Explains letters, notices, forms, bills, claim updates, and official-looking messages in ordinary words.</p>
+        </div>
+
+        <div class="feature glass reveal">
+          <div class="feature-icon">🧭</div>
+          <h3>Next-step guidance</h3>
+          <p>Highlights deadlines, required documents, payment warnings, and what the user should check next.</p>
+        </div>
+
+        <div class="feature glass reveal">
+          <div class="feature-icon">🗣️</div>
+          <h3>Voice-friendly</h3>
+          <p>Designed for families who prefer listening over reading, especially for parents and non-English speakers.</p>
+        </div>
+
+        <div class="feature glass reveal">
+          <div class="feature-icon">🛡️</div>
+          <h3>Trust notes</h3>
+          <p>Clearly separates simple explanation from legal, medical, or financial advice for serious documents.</p>
+        </div>
+
+        <div class="feature glass reveal">
+          <div class="feature-icon">💬</div>
+          <h3>WhatsApp-native</h3>
+          <p>No app install. No new habit. The product lives where users already ask family for help.</p>
+        </div>
+
+        <div class="feature glass reveal">
+          <div class="feature-icon">🌏</div>
+          <h3>Language expansion</h3>
+          <p>Start with Tamil, then add Hindi and other Indian languages once the explanation quality is strong.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo">
+      <div class="section-head reveal">
+        <div class="kicker">Example experience</div>
+        <h2>From a scary notice to a calm answer.</h2>
+      </div>
+
+      <div class="demo-panel">
+        <div class="upload-card glass reveal">
+          <h3>Before Vaanurai</h3>
+          <p class="section-text">
+            A user receives a serious-looking letter and cannot tell if it is a warning, reminder, payment request, or scam.
+          </p>
+          <div class="mini-document">
+            <span class="stamp">URGENT NOTICE</span>
+            <h4 style="margin: 0 0 10px;">Document verification required</h4>
+            <div class="doc-line long"></div>
+            <div class="doc-line mid"></div>
+            <div class="doc-line long"></div>
+            <div class="doc-line short"></div>
+            <p style="font-size:.86rem; color:#64748b; line-height:1.6;">
+              Please submit the requested details before the mentioned date to avoid temporary service restrictions.
+            </p>
+          </div>
+        </div>
+
+        <div class="answer-card glass reveal">
+          <h3>After Vaanurai</h3>
+          <div class="answer-list">
+            <div class="answer-row"><span class="dot-check">✓</span><span><strong>Meaning:</strong> They are asking you to verify one document.</span></div>
+            <div class="answer-row"><span class="dot-check">✓</span><span><strong>Urgency:</strong> Medium. Do it before the date mentioned.</span></div>
+            <div class="answer-row"><span class="dot-check">✓</span><span><strong>Next step:</strong> Use the official website or visit the office. Do not share OTP with anyone.</span></div>
+            <div class="answer-row"><span class="dot-check">✓</span><span><strong>Language:</strong> Tamil/Hindi explanation and voice note available.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="launch">
+      <div class="section-head reveal">
+        <div class="kicker">MVP plan</div>
+        <h2>Launch small. Learn fast. Build trust first.</h2>
+      </div>
+
+      <div class="pricing">
+        <div class="price-card glass reveal">
+          <div class="price-badge">Pilot model</div>
+          <h3 class="price">Free <span>for first users</span></h3>
+          <p class="section-text">
+            Start with free explanations for the first testers. Once people trust it, add small per-document payments and family packs.
+          </p>
+          <div class="launch-list">
+            <div class="launch-item"><span class="dot-check">✓</span><span>First 20–50 users from family, friends, and local groups.</span></div>
+            <div class="launch-item"><span class="dot-check">✓</span><span>Test with real Tamil documents, bills, and notices.</span></div>
+            <div class="launch-item"><span class="dot-check">✓</span><span>Add paid modes only after answer quality is reliable.</span></div>
+          </div>
+        </div>
+
+        <div class="price-card glass reveal">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="week">Week 1–2</div>
+              <p>Build landing page, WhatsApp flow, image reading, and text explanation pipeline.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="week">Week 3–4</div>
+              <p>Test real documents. Improve prompts for bills, bank notices, insurance letters, and government forms.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="week">Week 5–6</div>
+              <p>Add user tracking, feedback buttons, and simple payment link after free usage.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="week">Week 7–8</div>
+              <p>Add voice note output, Hindi support, demo video, and referral sharing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trust">
+      <div class="trust">
+        <div class="trust-box glass reveal">
+          <h3>Privacy and respect by design.</h3>
+          <p>
+            Vaanurai should be built with simple privacy language, minimal document storage, and clear user consent.
+            People will only trust this product if it feels safe for family documents.
+          </p>
+        </div>
+
+        <div class="trust-box glass warning reveal">
+          <h3>Important disclaimer.</h3>
+          <p>
+            Vaanurai explains documents in plain language. It should not claim to be a lawyer, doctor, insurer, bank,
+            or government authority. For serious matters, users should verify with the official institution or a professional.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="join" class="cta">
+      <div class="cta-panel reveal">
+        <div class="kicker">Coming soon</div>
+        <h2>Build the first version of Vaanurai for real families.</h2>
+        <p>
+          Start with a focused WhatsApp demo: users send one document and receive a clear, friendly explanation.
+          Keep it simple, human, and useful.
+        </p>
+        <div class="cta-actions">
+          <a class="btn btn-whatsapp" href="https://wa.me/REPLACE_WITH_YOUR_NUMBER" target="_blank" rel="noreferrer">WhatsApp demo</a>
+          <a class="btn btn-primary" href="mailto:hello@vaanurai.com?subject=Join%20Vaanurai%20waitlist">Join waitlist</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-inner">
+        <div>© 2026 Vaanurai. A product of DV Labs.</div>
+        <div>hello@vaanurai.com · vaanurai.com</div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const revealEls = document.querySelectorAll('.reveal');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.13 });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    const words = ["letter", "notice", "bill", "message", "claim reply"];
+    let wordIndex = 0;
+    const title = document.querySelector("h1 .gradient-text");
+
+    setInterval(() => {
+      wordIndex = (wordIndex + 1) % words.length;
+      title.animate([
+        { opacity: 1, transform: "translateY(0)" },
+        { opacity: 0.65, transform: "translateY(-4px)" },
+        { opacity: 1, transform: "translateY(0)" }
+      ], { duration: 450, easing: "ease" });
+    }, 2800);
+  </script>
+</body>
+</html>
